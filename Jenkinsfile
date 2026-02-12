@@ -8,11 +8,27 @@ pipeline {
             }
         }
         */
-        stage('Environment Check') {
+        stage('Install Dependencies') {
             steps {
-                sh 'python3 --version'
+                script {
+                    // Create and use a virtual environment
+                    sh 'python3 -m venv venv'
+                    sh '. venv/bin/activate'
+                    sh 'pip install -r requirements.txt'
+                }
             }
-        stage('Build & Test') {
+        }
+
+        stage('Run Tests') {
+            steps {
+                script {
+                    // Activate venv and run tests (e.g., using pytest)
+                    sh '. venv/bin/activate'
+                    sh 'pytest' 
+                }
+            }
+        }
+        stage('Run') {
             steps {
                 // We use a shell command to run our python script
                 sh 'python3 app.py'
