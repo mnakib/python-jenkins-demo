@@ -25,7 +25,7 @@ USER root
 
 # Install Python 3 and pip
 RUN apt-get update && \
-    apt-get install -y python3 python3-pip python3-venv && \
+    apt-get install -y python3 python3-pip python3-venv zip && \
     rm -rf /var/lib/apt/lists/*
 
 # Switch back to the standard jenkins user
@@ -335,54 +335,3 @@ pipeline {
     }
 }
 ```
-    environment {
-        DEPLOY_PATH = '/var/jenkins_home/production_env'
-    }
-
-    stages {
-        stage('Build & Test') {
-            steps {
-                sh 'python3 app.py'
-            }
-        }
-        stage('Archive Artifact') {
-            steps {
-                sh 'zip my-python-app.zip app.py'
-                archiveArtifacts 'my-python-app.zip'
-            }
-        }
-        stage('Deploy to Production') {
-            steps {
-                // 1. Create the production folder if it doesn't exist
-                sh "mkdir -p ${DEPLOY_PATH}"
-                
-                // 2. Unzip the artifact into the production folder
-                sh "unzip -o my-python-app.zip -d ${DEPLOY_PATH}"
-                
-                echo "App successfully deployed to ${DEPLOY_PATH}"
-            }
-        }
-    }
-}
-```
-
----
-
-### Understanding the Flow
-
-1. **Build & Test:** Proves the code works.
-2. **Archive:** Creates the "package" (The Artifact).
-3. **Deploy:** Puts the package where the users (or other servers) can access it.
-
-### How to see the results:
-
-* **Artifacts:** Go to your Jenkins Job dashboard. You will see a new section called **"Build Artifacts"** with your `.zip` file ready for download.
-* **Deployment:** You can verify the "deployment" by looking inside your Podman container:
-```bash
-podman exec jenkins-python ls /var/jenkins_home/production_env
-
-```
-
-
-
-**Would you like me to show you how to add a "Post-Deployment" test to verify the app is actually running in that production folder?**
