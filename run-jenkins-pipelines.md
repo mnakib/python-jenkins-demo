@@ -71,19 +71,6 @@ Create the Jenkins pipeline file. This file must be called `Jenkinsfile` and it 
 pipeline {
     agent any
     stages {
-        // This stage is commented as the repo cloning is done by Jenkins before running the pipeline
-        /*
-        stage('Checkout') {
-            steps {
-                git 'https://github.com/YOUR_USERNAME/python-jenkins-demo.git'
-            }
-        }
-        */
-        // Check the version of Python
-        stage('Environment Check') {
-            steps {
-                sh 'python3 --version'
-            }
         }
         stage('Build & Test') {
             steps {
@@ -109,7 +96,7 @@ podman run -d \
   --name jenkins-server \
   -p 8080:8080 -p 50000:50000 \
   -v jenkins_home:/var/jenkins_home \
-  jenkins/jenkins:lts
+  python-jenkins
 ```
 
 Display the container logs and scroll down to get the Jenkins GUI Web console password
