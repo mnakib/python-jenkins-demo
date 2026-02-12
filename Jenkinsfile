@@ -1,8 +1,5 @@
 pipeline {
     agent any
-    agent {
-        docker { image 'python:3.10-slim' } 
-    }
     stages {
         /*
         stage('Checkout') {
@@ -11,6 +8,10 @@ pipeline {
             }
         }
         */
+        stage('Environment Check') {
+            steps {
+                sh 'python3 --version'
+            }
         stage('Build & Test') {
             steps {
                 // We use a shell command to run our python script
