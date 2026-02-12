@@ -1,13 +1,6 @@
 pipeline {
     agent any
     stages {
-        /*
-        stage('Checkout') {
-            steps {
-                git 'https://github.com/mnakib/python-jenkins-demo.git'
-            }
-        }
-        */
         stage('Build & Test') {
             steps {
                 // We use a shell command to run our python script
