@@ -14,8 +14,8 @@ pipeline {
         }
         stage('Archive Artifact') {
             steps {
-                sh 'zip my-python-app.zip app.py'
-                archiveArtifacts 'my-python-app.zip'
+                sh 'zip python-app.zip app.py'
+                archiveArtifacts 'python-app.zip'
             }
         }
         stage('Deploy to Production') {
@@ -24,7 +24,7 @@ pipeline {
                 sh "mkdir -p ${DEPLOY_PATH}"
                 
                 // 2. Unzip the artifact into the production folder
-                sh "unzip -o my-python-app.zip -d ${DEPLOY_PATH}"
+                sh "unzip -o python-app.zip -d ${DEPLOY_PATH}"
                 
                 echo "App successfully deployed to ${DEPLOY_PATH}"
             }
