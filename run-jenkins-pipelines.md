@@ -35,6 +35,9 @@ USER jenkins
 ```bash
 # Create the image
 podman build -t python-jenkins .
+
+# Check the image is successfully created
+podman images
 ```
 
 
@@ -45,7 +48,7 @@ Create a new GitHub repo (e.g., `python-jenkins-demo`) and add these two files.
 
 ### 1.1 The App: `app.py`
 
-A simple calculator script with a built-in test.
+Create the Python application file, named `app.py`, containing a simple calculator script with a built-in test.
 
 ```python
 def add(a, b):
@@ -62,16 +65,12 @@ if __name__ == "__main__":
 
 ### 1.2 The Pipeline: `Jenkinsfile`
 
-This defines the "DevOps steps": pulling code, setting up Python, and running tests.
+Create the Jenkins pipeline file. This file must be called `Jenkinsfile` and it defines the "DevOps steps": pulling code, setting up Python, and running tests.
 
 ```groovy
 pipeline {
     agent any
     stages {
-        stage('Checkout') {
-            steps {
-                git 'https://github.com/YOUR_USERNAME/python-jenkins-demo.git'
-            }
         }
         stage('Build & Test') {
             steps {
