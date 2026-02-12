@@ -115,7 +115,7 @@ podman run -d \
 Display the container logs and scroll down to get the Jenkins GUI Web console password
 
 ```bash
-podman logs jenkins-python
+podman logs jenkins-server
 ```
 
 ```text
