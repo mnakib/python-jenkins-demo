@@ -1,30 +1,33 @@
 pipeline {
     agent any
+    
+    // We define a variable for where 'Production' is
+    environment {
+        DEPLOY_PATH = '/var/jenkins_home/production_env'
+    }
+
     stages {
-        // This stage is commented as the repo cloning is done by Jenkins before running the pipeline
-        /*
-        stage('Checkout') {
-            steps {
-                git 'https://github.com/YOUR_USERNAME/python-jenkins-demo.git'
-            }
-        }
-        */
-        // Check the version of Python
-        stage('Environment Check') {
-            steps {
-                sh 'python3 --version'
-            }
-        }
         stage('Build & Test') {
             steps {
-                // We use a shell command to run our python script
                 sh 'python3 app.py'
             }
         }
-    }
-    post {
-        success {
-            echo 'Pipeline completed successfully!'
+        stage('Archive Artifact') {
+            steps {
+                sh 'zip my-python-app.zip app.py'
+                archiveArtifacts 'my-python-app.zip'
+            }
+        }
+        stage('Deploy to Production') {
+            steps {
+                // 1. Create the production folder if it doesn't exist
+                sh "mkdir -p ${DEPLOY_PATH}"
+                
+                // 2. Unzip the artifact into the production folder
+                sh "unzip -o my-python-app.zip -d ${DEPLOY_PATH}"
+                
+                echo "App successfully deployed to ${DEPLOY_PATH}"
+            }
         }
     }
 }
