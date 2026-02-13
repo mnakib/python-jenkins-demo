@@ -4,6 +4,8 @@ pipeline {
         // The DOCKER_HUB instructuion replaces both DOCKER_HUB_USER and REGISTRY_CREDENTIALS_ID
         DOCKER_HUB = credentials('docker-hub-creds')
         IMAGE_NAME = "python-jenkins-demo"
+        // Define the ID here so you can reuse it easily
+        REGISTRY_ID = 'docker-hub-creds'
     }
     stages {
         stage('Build & Test') {
@@ -23,7 +25,7 @@ pipeline {
             steps {
                 script {
                     // Use credentials stored in Jenkins to log in and push
-                    docker.withRegistry('', REGISTRY_CREDENTIALS_ID) {
+                    docker.withRegistry('', REGISTRY_ID) {
                         appImage.push()
                         appImage.push('latest')
                     }
@@ -33,6 +35,7 @@ pipeline {
     }
     post {
         always {
+            // Best practice to clean up after building images
             cleanWs()
         }
     }
