@@ -157,7 +157,7 @@ Fow now, let's define a pipeline that just creates an image artifact and pushes 
 
 But before, Jenkins must be able to 
 
-**- 1 Build the image:** which will need to install the Docker plugin in Jenkins.
+**- 1 Build the image:** which will need to install the _Docker plugin_ in Jenkins.
 
 **- 2 Connect to the image registry:** which in this case _Docker Hub_ to be able to push it after the build is done.
 
@@ -173,10 +173,10 @@ Installing the Docker plugin allows to use the `docker.build()` syntax in the pi
 
 ### Configure the image registry credentials in Jenkins
 
-**1- Create Credentials:** Go to **Manage Jenkins > Credentials > System > Global credentials**.
-**2- Add Your Details:** Click **Add Credentials**, select **Username with password**, and enter your Docker Hub username and password (or Access Token).
-**3- Define the ID:** In the ID field, type a name: `docker-hub-creds`.
-**4- Update Your Code:** Use that exact name in your pipeline
+- ** Create Credentials:** Go to **Manage Jenkins > Credentials > System > Global credentials**.
+- ** Add Your Details:** Click **Add Credentials**, select **Username with password**, and enter your Docker Hub username and password (or Access Token).
+- ** Define the ID:** In the ID field, type a name: `docker-hub-creds`.
+** Update Your Code:** Use that exact name in your pipeline
 
 ### Install the Docker plugin
 
