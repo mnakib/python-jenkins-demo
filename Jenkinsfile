@@ -6,6 +6,11 @@ pipeline {
         IMAGE_NAME = "python-jenkins-demo"
     }
     stages {
+        stage('Clean Workspace') {
+            steps {
+                cleanWs()
+            }
+        }
         stage('Build & Test') {
             steps {
                 sh 'python3 app.py'
