@@ -1,6 +1,3 @@
-// Declare the the image name as a global variable
-def appImage 
-
 pipeline {
     agent any
     environment {
@@ -19,8 +16,14 @@ pipeline {
         stage('Create Docker Artifact') {
             steps {
                 script {
-                    // Build the image using the Dockerfile in the repo
-                    appImage = docker.build("${DOCKER_HUB_USR}/${IMAGE_NAME}:${env.BUILD_NUMBER}")
+                    // Force the full name into a variable to ensure consistency
+                    def fullImageName = "${DOCKER_HUB_USR}/${IMAGE_NAME}:${env.BUILD_NUMBER}"
+
+                    // Build the image
+                    appImage = docker.build(fullImageName)
+
+                // DEBUG: List images to ensure it actually exists in the local daemon
+                sh "docker images | grep ${IMAGE_NAME}"
                 }
             }
         }
