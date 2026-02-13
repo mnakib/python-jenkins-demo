@@ -25,8 +25,11 @@ USER root
 
 # Install Python 3 and pip
 RUN apt-get update && \
-    apt-get install -y python3 python3-pip python3-venv zip && \
+    apt-get install -y python3 python3-pip python3-venv docker.io zip && \
     rm -rf /var/lib/apt/lists/*
+
+# Give the jenkins user access to the docker group
+RUN usermod -aG docker jenkins
 
 # Switch back to the standard jenkins user
 USER jenkins
@@ -94,8 +97,10 @@ pipeline {
 # Run Jenkins in a Podman container 
 podman run -d \
   --name jenkins-server \
+  -u root \
   -p 8080:8080 -p 50000:50000 \
   -v jenkins_home:/var/jenkins_home \
+  -v /run/user/$(id -u)/podman/podman.sock:/var/run/docker.sock \
   python-jenkins
 ```
 
@@ -103,6 +108,12 @@ Display the container logs and scroll down to get the Jenkins GUI Web console pa
 
 ```bash
 podman logs jenkins-server
+```
+
+Or display the contentn of the `initialAdminPassword` inside the container
+
+```bash
+podman exec -it jenkins-server cat /var/jenkins_home/secrets/initialAdminPassword
 ```
 
 ```text
@@ -176,7 +187,7 @@ Installing the Docker plugin allows to use the `docker.build()` syntax in the pi
 - **Create Credentials:** Go to **Manage Jenkins > Credentials > System > Global credentials**.
 - **Add Your Details:** Click **Add Credentials**, select **Username with password**, and enter your Docker Hub username and password (or Access Token).
 - **Define the ID:** In the ID field, type a name: `docker-hub-creds`.
-- **Update Your Code:** Use that exact name in your pipeline
+- **Update Your Code:** Use that exact name in your pipeline. That is the  which is `DOCKER_HUB = credentials('docker-hub-creds')`
 
 ### Install the Docker plugin
 
@@ -192,6 +203,8 @@ pipeline {
         // The DOCKER_HUB instructuion replaces both DOCKER_HUB_USER and REGISTRY_CREDENTIALS_ID
         DOCKER_HUB = credentials('docker-hub-creds')
         IMAGE_NAME = "python-jenkins-demo"
+        // Define the ID here so you can reuse it easily
+        REGISTRY_ID = 'docker-hub-creds'
     }
     stages {
         stage('Build & Test') {
@@ -203,7 +216,7 @@ pipeline {
             steps {
                 script {
                     // Build the image using the Dockerfile in the repo
-                    appImage = docker.build("${DOCKER_HUB_USER}/${IMAGE_NAME}:${env.BUILD_NUMBER}")
+                    appImage = docker.build("${DOCKER_HUB_USR}/${IMAGE_NAME}:${env.BUILD_NUMBER}")
                 }
             }
         }
@@ -211,12 +224,18 @@ pipeline {
             steps {
                 script {
                     // Use credentials stored in Jenkins to log in and push
-                    docker.withRegistry('', REGISTRY_CREDENTIALS_ID) {
+                    docker.withRegistry('', REGISTRY_ID) {
                         appImage.push()
                         appImage.push('latest')
                     }
                 }
             }
+        }
+    }
+    post {
+        always {
+            // Best practice to clean up after building images
+            cleanWs()
         }
     }
 }
