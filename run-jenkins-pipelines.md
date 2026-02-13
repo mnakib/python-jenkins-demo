@@ -144,77 +144,78 @@ Click **Build Now** on the left menu. Jenkins will:
 
 ---
 
-## What's the "Next Step" in the DevOps Lifecycle?
+## 5. What's the "Next Step" in the DevOps Lifecycle?
 
 Right now, your app runs, tests itself, and then... nothing. It just stays inside the Jenkins workspace. In a real-world scenario, the "Deploy" stage would follow:
 
 1. **Artifact Creation:** Jenkins zips up the code or builds a *new* Docker image of just the app.
-2. **Deployment:** Jenkins pushes that image to a production server (like AWS, Azure, or another Podman container).
+2. **Deployment:** Jenkins pushes that image to a production server (like AWS, Azure, a Kubernetes or OpenShift clustre,  or another Podman container).
 
 To showcase the progression of a DevOps pipeline, we will move from simply "testing" the code to "packaging" it and finally "deploying" it.
 
-### 1. Adding the "Artifact Creation" Stage
+Fow now, let's define a pipeline that just creates an image artifact and pushes it to image registry. We're using _Docker Hub_ in this pipeline example.
 
-In DevOps, an **Artifact** is the finished "product" of your build (like a `.zip`, `.exe`, or `.jar`). We want to bundle our `app.py` so it can be saved by Jenkins and downloaded later.
+But before, Jenkins must be able to 
+
+**- 1 Build the image:** which will need to install the Docker plugin in Jenkins.
+
+**- 2 Connect to the image registry:** which in this case _Docker Hub_ to be able to push it after the build is done.
+
+
+### Install the Docker plugin
+
+Installing the Docker plugin allows to use the `docker.build()` syntax in the pipeline to build the image.
+
+- Go to **Manage Jenkins > Plugins > Available Plugins.**
+- Search for and install **Docker Pipeline** (also known as docker-workflow).
+- **Restart Jenkins** after installation.
+
+
+### Configure the image registry credentials in Jenkins
+
+**1- Create Credentials:** Go to **Manage Jenkins > Credentials > System > Global credentials**.
+**2- Add Your Details:** Click **Add Credentials**, select **Username with password**, and enter your Docker Hub username and password (or Access Token).
+**3- Define the ID:** In the ID field, type a name: `docker-hub-creds`.
+**4- Update Your Code:** Use that exact name in your pipeline
+
+### Install the Docker plugin
+
+Installing the Docker plugin allows to use the `docker.build()` syntax in the pipeline to 
+
+
+
 
 ```groovy
 pipeline {
     agent any
-    stages {
-        stage('Build & Test') {
-            steps {
-                sh 'python3 app.py'
-            }
-        }
-        stage('Archive Artifact') {
-            steps {
-                // 1. Create a zip file containing our app
-                sh 'zip my-python-app.zip app.py'
-                
-                // 2. Tell Jenkins to store this file in its 'Archive'
-                archiveArtifacts artifacts: 'my-python-app.zip', fingerprint: true
-            }
-        }
-    }
-}
-```
-
-### Step 2: Adding the "Deployment" Stage
-
-In a beginner demo, "Deployment" usually means moving that artifact to a "Production" environment. Since we are running in a container, we will simulate a deployment by "shipping" the file to a specific folder on the server.
-
-**Complete `Jenkinsfile` (Version B):**
-
-```groovy
-pipeline {
-    agent any
-    
-    // We define a variable for where 'Production' is
     environment {
-        DEPLOY_PATH = '/var/jenkins_home/production_env'
+        // The DOCKER_HUB instructuion replaces both DOCKER_HUB_USER and REGISTRY_CREDENTIALS_ID
+        DOCKER_HUB = credentials('docker-hub-creds')
+        IMAGE_NAME = "python-jenkins-demo"
     }
-
     stages {
         stage('Build & Test') {
             steps {
                 sh 'python3 app.py'
             }
         }
-        stage('Archive Artifact') {
+        stage('Create Docker Artifact') {
             steps {
-                sh 'zip my-python-app.zip app.py'
-                archiveArtifacts 'my-python-app.zip'
+                script {
+                    // Build the image using the Dockerfile in the repo
+                    appImage = docker.build("${DOCKER_HUB_USER}/${IMAGE_NAME}:${env.BUILD_NUMBER}")
+                }
             }
         }
-        stage('Deploy to Production') {
+        stage('Push to Registry') {
             steps {
-                // 1. Create the production folder if it doesn't exist
-                sh "mkdir -p ${DEPLOY_PATH}"
-                
-                // 2. Unzip the artifact into the production folder
-                sh "unzip -o my-python-app.zip -d ${DEPLOY_PATH}"
-                
-                echo "App successfully deployed to ${DEPLOY_PATH}"
+                script {
+                    // Use credentials stored in Jenkins to log in and push
+                    docker.withRegistry('', REGISTRY_CREDENTIALS_ID) {
+                        appImage.push()
+                        appImage.push('latest')
+                    }
+                }
             }
         }
     }
@@ -223,11 +224,7 @@ pipeline {
 
 
 
-
-
-
-
-
+To showcase the progression of a DevOps pipeline, we will move from simply "testing" the code to "packaging" it and finally "deploying" it.
 
 
 
