@@ -173,10 +173,10 @@ Installing the Docker plugin allows to use the `docker.build()` syntax in the pi
 
 ### Configure the image registry credentials in Jenkins
 
-- ** Create Credentials:** Go to **Manage Jenkins > Credentials > System > Global credentials**.
-- ** Add Your Details:** Click **Add Credentials**, select **Username with password**, and enter your Docker Hub username and password (or Access Token).
-- ** Define the ID:** In the ID field, type a name: `docker-hub-creds`.
-** Update Your Code:** Use that exact name in your pipeline
+- **Create Credentials:** Go to **Manage Jenkins > Credentials > System > Global credentials**.
+- **Add Your Details:** Click **Add Credentials**, select **Username with password**, and enter your Docker Hub username and password (or Access Token).
+- **Define the ID:** In the ID field, type a name: `docker-hub-creds`.
+- **Update Your Code:** Use that exact name in your pipeline
 
 ### Install the Docker plugin
 
