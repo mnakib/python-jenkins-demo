@@ -1,10 +1,9 @@
 pipeline {
     agent any
     environment {
-        // Replace with your Docker Hub username
-        DOCKER_HUB_USER = 'mouradn81'
+        // The DOCKER_HUB instructuion replaces both DOCKER_HUB_USER and REGISTRY_CREDENTIALS_ID
+        DOCKER_HUB = credentials('docker-hub-creds')
         IMAGE_NAME = "python-jenkins-demo"
-        REGISTRY_CREDENTIALS_ID = 'docker-hub-creds' 
     }
     stages {
         stage('Build & Test') {
