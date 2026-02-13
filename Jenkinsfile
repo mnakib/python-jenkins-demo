@@ -1,32 +1,34 @@
 pipeline {
     agent any
-    
-    // We define a variable for where 'Production' is
     environment {
-        DEPLOY_PATH = '/var/jenkins_home/production_env'
+        // Replace with your Docker Hub username
+        DOCKER_HUB_USER = 'mouradn81'
+        IMAGE_NAME = "python-jenkins-demo"
+        REGISTRY_CREDENTIALS_ID = 'docker-hub-creds' 
     }
-
     stages {
         stage('Build & Test') {
             steps {
                 sh 'python3 app.py'
             }
         }
-        stage('Archive Artifact') {
+        stage('Create Docker Artifact') {
             steps {
-                sh 'zip python-app.zip app.py'
-                archiveArtifacts 'python-app.zip'
+                script {
+                    // Build the image using the Dockerfile in the repo
+                    appImage = docker.build("${DOCKER_HUB_USER}/${IMAGE_NAME}:${env.BUILD_NUMBER}")
+                }
             }
         }
-        stage('Deploy to Production') {
+        stage('Push to Registry') {
             steps {
-                // 1. Create the production folder if it doesn't exist
-                sh "mkdir -p ${DEPLOY_PATH}"
-                
-                // 2. Unzip the artifact into the production folder
-                sh "unzip -o python-app.zip -d ${DEPLOY_PATH}"
-                
-                echo "App successfully deployed to ${DEPLOY_PATH}"
+                script {
+                    // Use credentials stored in Jenkins to log in and push
+                    docker.withRegistry('', REGISTRY_CREDENTIALS_ID) {
+                        appImage.push()
+                        appImage.push('latest')
+                    }
+                }
             }
         }
     }
