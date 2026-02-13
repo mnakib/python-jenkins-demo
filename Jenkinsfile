@@ -1,3 +1,6 @@
+// Declare the the image name as a global variable
+def appImage 
+
 pipeline {
     agent any
     environment {
