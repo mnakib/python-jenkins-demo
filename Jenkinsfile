@@ -19,6 +19,11 @@ pipeline {
                     // Force the full name into a variable to ensure consistency
                     def fullImageName = "${DOCKER_HUB_USR}/${IMAGE_NAME}:${env.BUILD_NUMBER}"
 
+           
+                    // USE --load to ensure the image is available in 'docker images'
+                    // Use 'sh' to bypass the Docker Buildx "container" plugin's driver issues
+                    sh "docker build --load -t ${fullImageName} ."
+
                     // Build the image
                     appImage = docker.build(fullImageName)
 
