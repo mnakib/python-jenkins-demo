@@ -25,7 +25,7 @@ pipeline {
             steps {
                 script {
                     // Use credentials stored in Jenkins to log in and push
-                    docker.withRegistry('', REGISTRY_ID) {
+                    docker.withRegistry('', "{REGISTRY_ID}") {
                         appImage.push()
                         appImage.push('latest')
                     }
