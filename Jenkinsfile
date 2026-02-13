@@ -28,7 +28,7 @@ pipeline {
             steps {
                 script {
                     // Use credentials stored in Jenkins to log in and push
-                    docker.withRegistry('', "${REGISTRY_ID}") {
+                    docker.withRegistry('', 'docker-hub-creds') {
                         appImage.push()
                         appImage.push('latest')
                     }
@@ -38,8 +38,9 @@ pipeline {
     }
     post {
         always {
-            // Best practice to clean up after building images
+            // Best practice to remove the build workspace and local docker images to save space
             cleanWs()
+            sh "docker rmi ${DOCKER_HUB_USR}/${IMAGE_NAME}:${env.BUILD_NUMBER} || true"
         }
     }
 }
